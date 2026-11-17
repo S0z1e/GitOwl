@@ -1,0 +1,19 @@
+{
+  "name": "GitOwl",
+  "identifier": "dev.gitowl.app",
+  "version": "1.0.0",
+  "main": "./cmd/gitowl",
+  "out": "dist",
+  "macos": {
+    "minimumSystemVersion": "13.0"
+  },
+  "linux": {
+    "webview": false
+  },
+  "i18n": {
+    "dir": "internal/locales",
+    "source": "en"
+  },
+  "icon": "assets/icon.png",
+  "copyright": "\u00a9 2026 S0z1e"
+}

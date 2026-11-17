@@ -1,0 +1,5 @@
+# Keep MyGo Native UI and drop Onevra
+
+GitOwl keeps [MyGo](https://mygo.egoist.dev/) Native UI for its macOS interface: views defined in Go and drawn without a WebView. Native UI here is not AppKit and not SwiftUI. Onevra is dropped entirely. Its component library and plain window shell go; this is not a reskin. The window, sidebar, lists and buttons are custom-drawn on MyGo, so the Onevra dependency goes. Custom drawing follows MyGo's rendering and input model and has no system material, so the shell does not use vibrancy or blur. Staying on Onevra and only changing its colors was rejected, as were AppKit, SwiftUI and a WebView: the interface stays in Go, drawn by GitOwl on MyGo. This supersedes the Onevra half of [ADR 0001](0001-mygo-native-ui-and-onevra.md). The MyGo Native UI half of that decision stands.
+
+The product remains a lightweight macOS Git client for reviewing changes and history, managing branches and preparing commit messages. The custom shell does not turn it into a file manager. Surfaces, accent, type and chrome are specified in [Interface conventions](../interface-conventions.md).
