@@ -1,0 +1,62 @@
+# .github/workflows/release.yml
+# Builds GitOwl for macOS and attaches the .dmg to a GitHub Release.
+# Runs ONLY when a tag matching v* is pushed, e.g.:
+#   git tag v1.0.0 && git push origin v1.0.0
+# A plain push to main does nothing.
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-macos:
+    runs-on: macos-15 # Apple Silicon runner; swap to macos-26 if you prefer
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      # Stamp the tag version (v1.2.3 -> 1.2.3) into mygo.json so the
+      # .dmg is named "GitOwl 1.2.3 arm64.dmg" instead of 1.0.0.
+      # Only affects the runner's checkout, not the committed file.
+      # Delete this step if you want the version to stay as mygo.json says.
+      - name: Set version from tag
+        run: |
+          python3 - <<'EOF'
+          import json, os
+          tag = os.environ["GITHUB_REF_NAME"].removeprefix("v")
+          with open("mygo.json") as f:
+              data = json.load(f)
+          data["version"] = tag
+          with open("mygo.json", "w") as f:
+              json.dump(data, f, indent=2)
+              f.write("\n")
+          print("version =", tag)
+          EOF
+
+      # Existing build script: go tool mygo generate + mygo build,
+      # output goes to dist/darwin-arm64/ (GitOwl.app + .dmg).
+      # Ad-hoc signed, not notarized, same as a local build.
+      - name: Build macOS app + dmg
+        run: ./scripts/build-macos.sh
+
+      # Creates the Release for this tag (if missing) and uploads the .dmg.
+      # Release notes are auto-generated from merged PRs / commits.
+      - name: Create Release with .dmg
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/darwin-arm64/*.dmg
+          generate_release_notes: true
+
+      # Optional: gate releases on the test suite. It takes ~14 min
+      # headless (see README), so it is off by default.
+      # - name: Test
+      #   run: go test ./... -timeout 30m
